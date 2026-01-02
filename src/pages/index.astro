@@ -188,7 +188,11 @@
 	}
 
 	.terminal-line.has-output {
-		margin-bottom: clamp(1.25rem, 3.5vw, 2rem);
+		margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
+	}
+	
+	#command-line-2.has-output {
+		margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
 	}
 
 	.terminal-line > * {
@@ -303,7 +307,11 @@
 	}
 
 	.terminal-line + .command-output-line {
-		margin-top: clamp(1rem, 2.5vw, 1.5rem);
+		margin-top: clamp(0.5rem, 1.5vw, 0.75rem);
+	}
+	
+	#command-line-2 + #projects-output-initial .command-output-line:first-child {
+		margin-top: clamp(0.5rem, 1.5vw, 0.75rem);
 	}
 
 	.command-output-line:last-child {
@@ -688,17 +696,23 @@
 Type a command and press Enter to execute it.`;
 			},
 			clear: () => {
-				// Eliminar todas las líneas dinámicas (comandos y resultados) excepto el input
+				// Eliminar todas las líneas dinámicas (comandos y resultados) excepto el input y contenido inicial
 				const interactiveLine = commandInput.parentElement as HTMLElement;
+				const projectsInitial = document.getElementById('projects-output-initial');
+				const commandLine2 = document.getElementById('command-line-2');
 				const allLines = terminalBody.querySelectorAll('.terminal-line, .command-output-line');
 				allLines.forEach((line) => {
 					// No eliminar el input interactivo ni las líneas iniciales
-					if (!line.contains(commandInput) && 
-					    !line.id?.startsWith('command-line-') && 
-					    !line.id?.startsWith('hero-') && 
-					    !line.id?.startsWith('description-') &&
-					    !line.id?.startsWith('about-') &&
-					    !line.id?.startsWith('projects-')) {
+					const isInitialContent = 
+						line.id === 'command-line-2' ||
+						line.id === 'command-line-1' ||
+						line.id?.startsWith('hero-') || 
+						line.id?.startsWith('description-') ||
+						line.id?.startsWith('about-') ||
+						(commandLine2 && commandLine2.contains(line)) ||
+						(projectsInitial && projectsInitial.contains(line));
+					
+					if (!line.contains(commandInput) && !isInitialContent) {
 						line.remove();
 					}
 				});
