@@ -39,13 +39,7 @@
 				<span class="cursor" id="cursor-2">_</span>
 			</div>
 			
-			<div class="terminal-line hidden" id="projects-line">
-				<span class="output-accent">Projects</span>
-			</div>
-			
-			<div class="terminal-line hidden" id="projects-list">
-				<ul id="projects-output"></ul>
-			</div>
+			<div id="projects-output-initial"></div>
 			
 			<div class="terminal-line interactive-line hidden" id="interactive-line">
 				<span class="prompt">$</span>
@@ -59,7 +53,7 @@
 					spellcheck="false"
 					aria-label="Terminal command input"
 				/>
-				<span class="cursor blink" id="cursor-final">_</span>
+				<!-- <span class="cursor blink" id="cursor-final">_</span> -->
 			</div>
 			<div id="autocomplete-suggestions" class="autocomplete-suggestions"></div>
 			<div id="command-output"></div>
@@ -177,10 +171,11 @@
 		overflow-x: hidden;
 		overflow-y: auto;
 		box-sizing: border-box;
+		scroll-behavior: smooth;
 	}
 
 	.terminal-line {
-		margin-bottom: clamp(0.5rem, 2vw, 1rem);
+		margin-bottom: clamp(0.75rem, 2.5vw, 1.25rem);
 		display: flex;
 		align-items: baseline;
 		gap: clamp(0.25rem, 1vw, 0.5rem);
@@ -190,6 +185,10 @@
 		overflow-wrap: break-word;
 		box-sizing: border-box;
 		max-width: 100%;
+	}
+
+	.terminal-line.has-output {
+		margin-bottom: clamp(1.25rem, 3.5vw, 2rem);
 	}
 
 	.terminal-line > * {
@@ -205,12 +204,17 @@
 	}
 
 	.command {
-		color: var(--command-color);
+		color: var(--command-color) !important;
 		word-wrap: break-word;
 		overflow-wrap: break-word;
 		flex: 1;
 		min-width: 0;
 		max-width: 100%;
+		font-weight: 500;
+	}
+	
+	.terminal-line .command {
+		color: var(--command-color) !important;
 	}
 
 	.command-input {
@@ -288,17 +292,18 @@
 	}
 
 	.command-output-line {
-		margin-bottom: 0.25rem;
+		margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
 		color: var(--text-secondary);
 		font-size: inherit;
 		word-wrap: break-word;
 		overflow-wrap: break-word;
 		max-width: 100%;
 		padding-left: 0;
+		line-height: 1.6;
 	}
 
 	.terminal-line + .command-output-line {
-		margin-top: 0.25rem;
+		margin-top: clamp(1rem, 2.5vw, 1.5rem);
 	}
 
 	.command-output-line:last-child {
@@ -363,32 +368,6 @@
 		51%, 100% { opacity: 0; }
 	}
 
-	#projects-output {
-		list-style: none;
-		padding-left: 0;
-	}
-
-	#projects-output li {
-		color: var(--text-secondary);
-		margin-bottom: clamp(0.5rem, 2vw, 0.75rem);
-		padding-left: clamp(0.75rem, 2vw, 1rem);
-		position: relative;
-		word-wrap: break-word;
-		overflow-wrap: break-word;
-		max-width: 100%;
-	}
-
-	#projects-output li::before {
-		content: '▸';
-		position: absolute;
-		left: 0;
-		color: var(--accent);
-	}
-
-	#projects-output li strong {
-		color: var(--text-primary);
-		font-weight: 500;
-	}
 
 	footer {
 		margin-top: clamp(1rem, 4vw, 2rem);
@@ -563,36 +542,49 @@
 								typeWriter('command-2', initialCommands[1].text, 80, () => {
 									setTimeout(() => {
 										hideCursor('cursor-2');
+										// Aplicar estilos al comando inicial
+										const cmd2El = document.getElementById('command-2');
+										if (cmd2El) {
+											cmd2El.style.color = 'var(--command-color)';
+											cmd2El.style.fontWeight = '500';
+										}
+										const cmd2Line = document.getElementById('command-line-2');
+										if (cmd2Line) {
+											cmd2Line.classList.add('has-output');
+										}
 										setTimeout(() => {
-											showLine('projects-line');
-											setTimeout(() => {
-												showLine('projects-list');
-												const projectsEl = document.getElementById('projects-output');
-												if (projectsEl) {
-													let projectIndex = 0;
-													const addNextProject = () => {
-														if (projectIndex < outputs.projects.length) {
-															const project = outputs.projects[projectIndex];
-															const li = document.createElement('li');
-															li.innerHTML = `<strong>${project.name}</strong> — ${project.desc}`;
-															projectsEl.appendChild(li);
-															projectIndex++;
-															setTimeout(addNextProject, 200);
-														} else {
-															// Cuando terminan todos los proyectos, mostrar input
-															setTimeout(() => {
-																showLine('interactive-line');
-																const input = document.getElementById('command-input') as HTMLInputElement;
-																if (input) {
-																	input.focus();
-																}
-																sessionStorage.setItem('hasVisited', 'true');
-															}, 300);
-														}
-													};
-													addNextProject();
-												}
-											}, 300);
+											const projectsContainer = document.getElementById('projects-output-initial');
+											if (projectsContainer) {
+												let projectIndex = 0;
+												const addNextProject = () => {
+													if (projectIndex < outputs.projects.length) {
+														const project = outputs.projects[projectIndex];
+														const line = document.createElement('div');
+														line.className = 'command-output-line';
+														line.innerHTML = `<span style="color: var(--accent); font-weight: 500;">${project.name}</span><span style="color: var(--text-secondary);"> — ${project.desc}</span>`;
+														projectsContainer.appendChild(line);
+														projectIndex++;
+														setTimeout(addNextProject, 200);
+													} else {
+														// Cuando terminan todos los proyectos, mostrar input
+														setTimeout(() => {
+															showLine('interactive-line');
+															const input = document.getElementById('command-input') as HTMLInputElement;
+															if (input) {
+																input.focus();
+															}
+															// Asegurar que el scroll esté al final
+															if (terminalBody) {
+																setTimeout(() => {
+																	terminalBody.scrollTop = terminalBody.scrollHeight;
+																}, 100);
+															}
+															sessionStorage.setItem('hasVisited', 'true');
+														}, 300);
+													}
+												};
+												addNextProject();
+											}
 										}, 300);
 									}, 300);
 								});
@@ -604,6 +596,10 @@
 
 			// Iniciar la primera secuencia después de un pequeño delay inicial
 			setTimeout(() => {
+				// Asegurar que el scroll esté al inicio
+				if (terminalBody) {
+					terminalBody.scrollTop = 0;
+				}
 				startSequence1();
 			}, 500);
 		} else {
@@ -628,17 +624,24 @@
 
 			showLine('command-line-2');
 			const cmd2El = document.getElementById('command-2');
-			if (cmd2El) cmd2El.textContent = initialCommands[1].text;
+			if (cmd2El) {
+				cmd2El.textContent = initialCommands[1].text;
+				cmd2El.style.color = 'var(--command-color)';
+				cmd2El.style.fontWeight = '500';
+			}
 			hideCursor('cursor-2');
+			const cmd2Line = document.getElementById('command-line-2');
+			if (cmd2Line) {
+				cmd2Line.classList.add('has-output');
+			}
 
-			showLine('projects-line');
-			showLine('projects-list');
-			const projectsEl = document.getElementById('projects-output');
-			if (projectsEl) {
+			const projectsContainer = document.getElementById('projects-output-initial');
+			if (projectsContainer) {
 				outputs.projects.forEach(project => {
-					const li = document.createElement('li');
-					li.innerHTML = `<strong>${project.name}</strong> — ${project.desc}`;
-					projectsEl.appendChild(li);
+					const line = document.createElement('div');
+					line.className = 'command-output-line';
+					line.innerHTML = `<span style="color: var(--accent); font-weight: 500;">${project.name}</span><span style="color: var(--text-secondary);"> — ${project.desc}</span>`;
+					projectsContainer.appendChild(line);
 				});
 			}
 
@@ -677,7 +680,6 @@
 
   • help              Show this help message
   • clear             Clear the console
-  • reset             Reset the terminal
   • whoami            Show user information
   • ls                List all projects
   • cd <name>         Enter a project directory
@@ -700,24 +702,10 @@ Type a command and press Enter to execute it.`;
 						line.remove();
 					}
 				});
-				return '';
-			},
-			reset: () => {
-				// Eliminar todas las líneas dinámicas (solo comandos ejecutados y sus resultados)
-				const allLines = terminalBody.querySelectorAll('.terminal-line, .command-output-line');
-				allLines.forEach((line) => {
-					if (!line.contains(commandInput) && 
-					    !line.id?.startsWith('command-line-') && 
-					    !line.id?.startsWith('hero-') && 
-					    !line.id?.startsWith('description-') &&
-					    !line.id?.startsWith('about-') &&
-					    !line.id?.startsWith('projects-')) {
-						line.remove();
-					}
-				});
+				// Limpiar historial de comandos
 				commandHistory = [];
 				historyIndex = -1;
-				return 'Terminal reset.';
+				return '';
 			},
 			whoami: () => {
 				return 'aleregex';
@@ -732,7 +720,11 @@ Type a command and press Enter to execute it.`;
 				const projectName = args.trim().toLowerCase();
 				const project = projectsData.find(p => p.name.toLowerCase() === projectName);
 				if (project) {
-					return `${project.name}\n${project.desc}\n\n${project.details}`;
+					// Redirigir a la página del proyecto
+					setTimeout(() => {
+						window.location.href = `/projects/${project.name}`;
+					}, 300);
+					return `Entering ${project.name}...`;
 				}
 				return `Project "${args}" not found.\nUse "ls" to see the list.`;
 			},
@@ -802,6 +794,27 @@ Type a command and press Enter to execute it.`;
 					} else {
 						line.textContent = lineText;
 					}
+				} else if (lineText.includes(' — ')) {
+					// Formato de ls: nombre — descripción
+					const parts = lineText.split(' — ');
+					if (parts.length === 2) {
+						line.innerHTML = `<span style="color: var(--accent); font-weight: 500;">${parts[0]}</span><span style="color: var(--text-secondary);"> — ${parts[1]}</span>`;
+					} else {
+						line.textContent = lineText;
+					}
+				} else if (lineText.includes('Entering') || lineText.includes('Opening')) {
+					// Mensajes de acción
+					const colonIndex = lineText.indexOf(':');
+					if (colonIndex > 0) {
+						line.innerHTML = `<span style="color: var(--accent); font-weight: 500;">${lineText.substring(0, colonIndex + 1)}</span><span style="color: var(--text-secondary);">${lineText.substring(colonIndex + 1)}</span>`;
+					} else {
+						line.style.color = 'var(--accent)';
+						line.textContent = lineText;
+					}
+				} else if (lineText.includes('not found') || lineText.includes('Command not found')) {
+					// Mensajes de error
+					line.style.color = '#ff6b6b';
+					line.textContent = lineText;
 				} else {
 					line.textContent = lineText;
 				}
@@ -823,10 +836,17 @@ Type a command and press Enter to execute it.`;
 		const createCommandLine = (cmd: string) => {
 			const line = document.createElement('div');
 			line.className = 'terminal-line';
-			line.innerHTML = `
-				<span class="prompt">$</span>
-				<span class="command">${cmd}</span>
-			`;
+			const prompt = document.createElement('span');
+			prompt.className = 'prompt';
+			prompt.textContent = '$';
+			prompt.style.color = 'var(--prompt-color)';
+			const command = document.createElement('span');
+			command.className = 'command';
+			command.textContent = cmd;
+			command.style.color = 'var(--command-color)';
+			command.style.fontWeight = '500';
+			line.appendChild(prompt);
+			line.appendChild(command);
 			return line;
 		};
 
@@ -908,14 +928,18 @@ Type a command and press Enter to execute it.`;
 				
 				if (cmd) {
 					// Crear línea con el comando ejecutado
-					const cmdLine = createCommandLine(cmd);
+					const cmdLine = createCommandLine(" "+cmd);
 					const interactiveLine = commandInput.parentElement as HTMLElement;
 					terminalBody.insertBefore(cmdLine, interactiveLine);
 					
 					// Ejecutar comando y mostrar resultado justo después del comando
 					const result = executeCommand(cmd);
 					if (result) {
-						addOutputLine(result, false, cmdLine);
+						cmdLine.classList.add('has-output');
+						// Pequeño delay para asegurar que el estilo se aplique
+						setTimeout(() => {
+							addOutputLine(result, false, cmdLine);
+						}, 10);
 					}
 					
 					// Limpiar input

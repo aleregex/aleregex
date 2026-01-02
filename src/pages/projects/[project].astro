@@ -1,0 +1,151 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { projects } from '../../data/projects';
+
+export async function getStaticPaths() {
+	return Object.keys(projects).map((project) => ({
+		params: { project }
+	}));
+}
+
+const { project } = Astro.params;
+const projectData = projects[project as keyof typeof projects];
+
+if (!projectData) {
+	return Astro.redirect('/404');
+}
+---
+
+<Layout>
+	<main>
+		<div class="project-container">
+			<nav class="back-nav">
+				<a href="/" class="back-link">
+					← Back to home
+				</a>
+			</nav>
+			
+			<article class="project-content">
+				<header class="project-header">
+					<h1 class="project-title">{projectData.name}</h1>
+					<p class="project-subtitle">{projectData.desc}</p>
+				</header>
+				
+				<div class="project-body">
+					<p class="project-details">{projectData.details}</p>
+				</div>
+			</article>
+		</div>
+	</main>
+</Layout>
+
+<style>
+	:root {
+		--bg-color: #0a0a0a;
+		--text-primary: #c9d1d9;
+		--text-secondary: #8b949e;
+		--accent: #7dd3a0;
+		--accent-hover: #9ee4c0;
+		--border-color: #30363d;
+	}
+
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+	}
+
+	body {
+		background-color: var(--bg-color);
+		color: var(--text-primary);
+		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+		line-height: 1.6;
+		min-height: 100vh;
+		padding: 0;
+		overflow-x: hidden;
+		width: 100%;
+		max-width: 100vw;
+		margin: 0;
+	}
+
+	main {
+		max-width: min(800px, 90%);
+		width: 100%;
+		margin: 0 auto;
+		padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 3vw, 2rem);
+		min-height: 100vh;
+	}
+
+	.project-container {
+		width: 100%;
+	}
+
+	.back-nav {
+		margin-bottom: clamp(2rem, 5vw, 3rem);
+	}
+
+	.back-link {
+		color: var(--text-secondary);
+		text-decoration: none;
+		font-size: clamp(0.9rem, 2vw, 1rem);
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		transition: color 0.2s ease;
+	}
+
+	.back-link:hover {
+		color: var(--accent);
+	}
+
+	.project-content {
+		width: 100%;
+	}
+
+	.project-header {
+		margin-bottom: clamp(2rem, 5vw, 3rem);
+		padding-bottom: clamp(1.5rem, 4vw, 2rem);
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.project-title {
+		color: var(--accent);
+		font-size: clamp(2rem, 6vw, 3.5rem);
+		font-weight: 600;
+		letter-spacing: -0.02em;
+		margin-bottom: clamp(0.75rem, 2vw, 1rem);
+		line-height: 1.2;
+		font-family: 'Pixel Operator Mono', 'Courier New', monospace;
+	}
+
+	.project-subtitle {
+		color: var(--text-secondary);
+		font-size: clamp(1rem, 2.5vw, 1.25rem);
+		line-height: 1.5;
+		font-weight: 400;
+	}
+
+	.project-body {
+		width: 100%;
+	}
+
+	.project-details {
+		color: var(--text-primary);
+		font-size: clamp(1rem, 2.5vw, 1.1rem);
+		line-height: 1.8;
+		white-space: pre-wrap;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+	}
+
+	@media (max-width: 768px) {
+		main {
+			padding: clamp(1.5rem, 4vw, 2rem) clamp(1rem, 3vw, 1.5rem);
+		}
+
+		.project-header {
+			margin-bottom: clamp(1.5rem, 4vw, 2rem);
+		}
+	}
+</style>
+
