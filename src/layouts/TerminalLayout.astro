@@ -1,0 +1,52 @@
+---
+import Layout from './Layout.astro';
+import Terminal from '../components/Terminal.astro';
+
+interface Props {
+	showFooter?: boolean;
+}
+
+const { showFooter = false } = Astro.props;
+---
+
+<Layout showFooter={showFooter}>
+	<main>
+		<Terminal>
+			<slot />
+		</Terminal>
+	</main>
+</Layout>
+
+<style>
+	main {
+		position: relative;
+		z-index: 1;
+		width: min(900px, calc(100% - 2rem));
+		height: 700px;
+		max-width: min(900px, calc(100% - 2rem));
+		max-height: 700px;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		flex-shrink: 0;
+	}
+
+	@media (max-width: 768px) {
+		main {
+			width: 100vw !important;
+			height: 100dvh !important;
+			max-width: 100vw !important;
+			max-height: 100dvh !important;
+			min-height: 100dvh !important;
+			margin: 0 !important;
+			padding: 0 !important;
+			justify-content: flex-start !important;
+			align-items: stretch !important;
+			flex-shrink: 0 !important;
+		}
+	}
+</style>
+
