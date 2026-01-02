@@ -48,16 +48,13 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
       autocapitalize="off"
       spellcheck="false"
       aria-label="Terminal command input"
-      disabled
-      readonly
-      tabindex="-1"
+      tabindex="0"
     />
     <!-- <span class="cursor blink" id="cursor-final">_</span> -->
   </div>
   <div id="autocomplete-suggestions" class="autocomplete-suggestions"></div>
   <div id="command-output"></div>
 </TerminalLayout>
-
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
@@ -99,7 +96,7 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
     ];
 
     const outputs = {
-      name: { element: "name-output", text: "aleregex", delay: 1000 },
+      name: { element: "name-output", text: "Alejandro Alvarez", delay: 1000 },
       description: {
         element: "description-output",
         text: "Software developer",
@@ -161,7 +158,21 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
           line.style.display = "none";
           return;
         }
+        // Mostrar línea y habilitar input en desktop
         line.classList.remove("hidden");
+        if (id === "interactive-line") {
+          line.style.display = "";
+          const input = line.querySelector('#command-input');
+          if (input instanceof HTMLInputElement) {
+            input.disabled = false;
+            input.readOnly = false;
+            input.removeAttribute('readonly');
+            input.removeAttribute('disabled');
+            input.setAttribute('tabindex', '0');
+            input.removeAttribute('aria-hidden');
+            input.focus();
+          }
+        }
       }
     };
 
