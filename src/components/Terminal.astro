@@ -1,9 +1,10 @@
 ---
 interface Props {
 	class?: string;
+	showExit?: boolean;
 }
 
-const { class: className = '' } = Astro.props;
+const { class: className = '', showExit = false } = Astro.props;
 ---
 
 <div class={`terminal ${className}`}>
@@ -12,6 +13,7 @@ const { class: className = '' } = Astro.props;
 		<span class="terminal-dot"></span>
 		<span class="terminal-dot"></span>
 		<div class="terminal-spacer"></div>
+        <span class="terminal-title">@aleregex</span>
 		<div class="terminal-social">
 			<a href="https://github.com/aleregex" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
 				<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
@@ -29,11 +31,15 @@ const { class: className = '' } = Astro.props;
 				</svg>
 			</a>
 		</div>
-		<span class="terminal-title">aleregex</span>
 	</div>
 	
 	<div class="terminal-body">
 		<slot />
 	</div>
+	{showExit && (
+		<div class="terminal-footer">
+			<a href="/" class="footer-command" aria-label="Back to root">:q  (back)</a>
+		</div>
+	)}
 </div>
 

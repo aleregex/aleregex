@@ -31,11 +31,11 @@ marked.setOptions({
 const htmlContent = marked.parse(projectData.details);
 ---
 
-<TerminalLayout>
-	<div class="terminal-line">
-		<span class="prompt">$</span>
-		<span class="command">vim README.md</span>
-	</div>
+<TerminalLayout showExit={true}>
+	<!-- <div class="terminal-line"> -->
+		<!-- <span class="prompt">$</span> -->
+		<!-- <span class="command">vim README.md</span> -->
+	<!-- </div> -->
 	
 	<div class="file-content">
 		<div class="file-header">
@@ -117,12 +117,9 @@ const htmlContent = marked.parse(projectData.details);
 		<div class="file-body" set:html={htmlContent}></div>
 	</div>
 	
-	<div class="terminal-line back-command-line">
-		<span class="prompt">$</span>
-		<a href="/" class="back-link">
-			<span class="command">:q</span>
-		</a>
-	</div>
+	<!-- <div class="back-row">
+		<a href="/" class="back-link">:q</a>
+	</div> -->
 </TerminalLayout>
 
 <style>
@@ -464,23 +461,24 @@ const htmlContent = marked.parse(projectData.details);
 		opacity: 0.8;
 	}
 
-	.back-command-line {
+	.back-row {
 		margin-top: clamp(1rem, 3vw, 1.5rem);
+		display: flex;
+		justify-content: flex-start;
 	}
 
 	.back-link {
 		text-decoration: none;
-		display: inline-flex;
-		align-items: center;
-		transition: opacity 0.2s ease;
+		color: var(--accent);
+		font-weight: 500;
+		font-family: 'Pixel Operator Mono', 'Courier New', monospace;
+		padding: 0.2rem 0.35rem;
+		border-radius: 4px;
+		transition: opacity 0.15s ease;
 	}
 
 	.back-link:hover {
-		opacity: 0.8;
-	}
-
-	.back-link .command {
-		color: var(--command-color);
+		opacity: 0.85;
 	}
 
 	@media (max-width: 768px) {

@@ -3,12 +3,6 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
 ---
 
 <TerminalLayout>
-  <div class="terminal-line" id="command-line-1">
-    <span class="prompt">$</span>
-    <span class="command" id="command-1"></span>
-    <span class="cursor" id="cursor-1">_</span>
-  </div>
-
   <div class="terminal-line hero-line hidden" id="hero-line">
     <span class="output" id="name-output"></span>
   </div>
@@ -67,14 +61,12 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
 
     // En móvil, ocultar inmediatamente todos los cursores y el input
     if (isMobile) {
-      const cursor1 = document.getElementById("cursor-1");
       const cursor2 = document.getElementById("cursor-2");
       const commandInput = document.getElementById(
         "command-input"
       ) as HTMLInputElement;
       const interactiveLine = document.getElementById("interactive-line");
 
-      if (cursor1) cursor1.style.display = "none";
       if (cursor2) cursor2.style.display = "none";
       if (commandInput) {
         commandInput.disabled = true;
@@ -90,10 +82,7 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
       }
     }
 
-    const initialCommands = [
-      { element: "command-1", text: "cd $HOME", delay: 500 },
-      { element: "command-2", text: "ls", delay: 2000 },
-    ];
+    const lsCommand = "ls";
 
     const outputs = {
       name: { element: "name-output", text: "Alejandro Alvarez", delay: 1000 },
@@ -179,35 +168,21 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
     if (shouldAnimate) {
       // En móvil, ocultar cursores desde el inicio
       if (isMobile) {
-        hideCursor("cursor-1");
         hideCursor("cursor-2");
       }
 
-      // Secuencia 1: whoami -> nombre -> descripción
+      // Secuencia 1: nombre -> descripción
       const startSequence1 = () => {
-        showLine("command-line-1");
-        typeWriter("command-1", initialCommands[0].text, 80, () => {
+        showLine("hero-line");
+        typeWriter("name-output", outputs.name.text, 100, () => {
           setTimeout(() => {
-            hideCursor("cursor-1");
-            setTimeout(() => {
-              showLine("hero-line");
-              typeWriter("name-output", outputs.name.text, 100, () => {
-                setTimeout(() => {
-                  showLine("description-line");
-                  typeWriter(
-                    "description-output",
-                    outputs.description.text,
-                    30,
-                    () => {
-                      // Cuando termina la secuencia 1, iniciar secuencia 2
-                      setTimeout(() => {
-                        startSequence2();
-                      }, 500);
-                    }
-                  );
-                }, 300);
-              });
-            }, 300);
+            showLine("description-line");
+            typeWriter("description-output", outputs.description.text, 30, () => {
+              // Cuando termina la secuencia 1, iniciar secuencia 2
+              setTimeout(() => {
+                startSequence2();
+              }, 500);
+            });
           }, 300);
         });
       };
@@ -223,7 +198,7 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
               // Cuando termina about, iniciar secuencia con ls
               setTimeout(() => {
                 showLine("command-line-2");
-                typeWriter("command-2", initialCommands[1].text, 80, () => {
+                typeWriter("command-2", lsCommand, 80, () => {
                   setTimeout(() => {
                     hideCursor("cursor-2");
                     // Aplicar estilos al comando inicial
@@ -296,16 +271,10 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
     } else {
       // En móvil, ocultar cursores desde el inicio
       if (isMobile) {
-        hideCursor("cursor-1");
         hideCursor("cursor-2");
       }
 
       // Mostrar todo instantáneamente
-      showLine("command-line-1");
-      const cmd1El = document.getElementById("command-1");
-      if (cmd1El) cmd1El.textContent = initialCommands[0].text;
-      hideCursor("cursor-1");
-
       showLine("hero-line");
       const nameEl = document.getElementById("name-output");
       if (nameEl) nameEl.textContent = outputs.name.text;
@@ -322,7 +291,7 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
       showLine("command-line-2");
       const cmd2El = document.getElementById("command-2");
       if (cmd2El) {
-        cmd2El.textContent = initialCommands[1].text;
+        cmd2El.textContent = lsCommand;
         cmd2El.style.color = "var(--command-color)";
         cmd2El.style.fontWeight = "500";
       }

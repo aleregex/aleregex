@@ -4,14 +4,15 @@ import Terminal from '../components/Terminal.astro';
 
 interface Props {
 	showFooter?: boolean;
+	showExit?: boolean;
 }
 
-const { showFooter = false } = Astro.props;
+const { showFooter = false, showExit = false } = Astro.props;
 ---
 
 <Layout showFooter={showFooter}>
 	<main>
-		<Terminal>
+		<Terminal showExit={showExit}>
 			<slot />
 		</Terminal>
 	</main>

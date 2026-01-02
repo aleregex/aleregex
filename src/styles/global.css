@@ -132,6 +132,7 @@ main {
 	display: flex;
 	flex-direction: column;
 	flex-shrink: 0;
+	position: relative;
 }
 
 @media (max-width: 768px) {
@@ -228,6 +229,30 @@ main {
 	letter-spacing: 0.1em;
 	white-space: nowrap;
 	flex-shrink: 0;
+}
+
+.terminal-footer {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	padding: 0.4rem 0.75rem;
+	border-top: 1px solid rgba(125, 211, 160, 0.25);
+	background: rgba(13, 17, 23, 0.9);
+	display: flex;
+	justify-content: flex-start;
+}
+
+.footer-command {
+	color: var(--accent);
+	font-family: 'Pixel Operator Mono', 'Courier New', monospace;
+	font-size: clamp(0.75rem, 2vw, 0.9rem);
+	text-decoration: none;
+	transition: opacity 0.15s ease;
+}
+
+.footer-command:hover {
+	opacity: 0.8;
 }
 
 .terminal-body {
