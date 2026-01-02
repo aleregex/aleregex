@@ -1,11 +1,988 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<main>
+	<div class="terminal">
+		<div class="terminal-header">
+			<span class="terminal-dot"></span>
+			<span class="terminal-dot"></span>
+			<span class="terminal-dot"></span>
+			<span class="terminal-title">terminal</span>
+		</div>
+		
+		<div class="terminal-body">
+			<div class="terminal-line" id="command-line-1">
+				<span class="prompt">$</span>
+				<span class="command" id="command-1"></span>
+				<span class="cursor" id="cursor-1">_</span>
+			</div>
+			
+			<div class="terminal-line hero-line hidden" id="hero-line">
+				<span class="output" id="name-output"></span>
+			</div>
+			
+			<div class="terminal-line hidden" id="description-line">
+				<span class="output-secondary" id="description-output"></span>
+			</div>
+			
+			<div class="terminal-line hidden" id="about-line">
+				<span class="output-accent">About</span>
+			</div>
+			
+			<div class="terminal-line hidden" id="about-text-line">
+				<span class="output-secondary" id="about-output"></span>
+			</div>
+			
+			<div class="terminal-line hidden" id="command-line-2">
+				<span class="prompt">$</span>
+				<span class="command" id="command-2"></span>
+				<span class="cursor" id="cursor-2">_</span>
+			</div>
+			
+			<div class="terminal-line hidden" id="projects-line">
+				<span class="output-accent">Projects</span>
+			</div>
+			
+			<div class="terminal-line hidden" id="projects-list">
+				<ul id="projects-output"></ul>
+			</div>
+			
+			<div class="terminal-line interactive-line hidden" id="interactive-line">
+				<span class="prompt">$</span>
+				<input 
+					type="text" 
+					class="command-input" 
+					id="command-input" 
+					autocomplete="off"
+					autocorrect="off"
+					autocapitalize="off"
+					spellcheck="false"
+					aria-label="Terminal command input"
+				/>
+				<span class="cursor blink" id="cursor-final">_</span>
+			</div>
+			<div id="autocomplete-suggestions" class="autocomplete-suggestions"></div>
+			<div id="command-output"></div>
+		</div>
+	</div>
+	
+	<footer>
+		<a href="https://github.com/aleregex" target="_blank" rel="noopener noreferrer">
+			<span class="prompt">$</span> cat github.txt
+		</a>
+	</footer>
+</main>
+
+<style>
+	:root {
+		--bg-color: #0a0a0a;
+		--terminal-bg: #0d1117;
+		--text-primary: #c9d1d9;
+		--text-secondary: #8b949e;
+		--accent: #7dd3a0;
+		--accent-hover: #9ee4c0;
+		--prompt-color: #58a6ff;
+		--command-color: #f0883e;
+		--border-color: #30363d;
+	}
+
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+	}
+
+	html {
+		overflow-x: hidden;
+		width: 100%;
+		max-width: 100vw;
+	}
+
+	body {
+		background-color: var(--bg-color);
+		color: var(--text-primary);
+		font-family: 'Pixel Operator Mono', 'Courier New', monospace;
+		line-height: 1.6;
+		min-height: 100vh;
+		padding: clamp(0.5rem, 2vw, 1rem);
+		overflow-x: hidden;
+		width: 100%;
+		max-width: 100vw;
+		margin: 0;
+	}
+
+	main {
+		max-width: min(900px, 100%);
+		width: 100%;
+		margin: 0 auto;
+		padding: 0;
+	}
+
+	.terminal {
+		background-color: var(--terminal-bg);
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		overflow: hidden;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+		width: 100%;
+		max-width: 100%;
+	}
+
+	.terminal-header {
+		background-color: #161b22;
+		padding: clamp(0.5rem, 2vw, 0.75rem) clamp(0.75rem, 2vw, 1rem);
+		display: flex;
+		align-items: center;
+		gap: clamp(0.25rem, 1vw, 0.5rem);
+		border-bottom: 1px solid var(--border-color);
+		flex-wrap: nowrap;
+	}
+
+	.terminal-dot {
+		width: clamp(8px, 2vw, 12px);
+		height: clamp(8px, 2vw, 12px);
+		border-radius: 50%;
+		background-color: #484f58;
+		flex-shrink: 0;
+	}
+
+	.terminal-dot:nth-child(1) {
+		background-color: #ff5f56;
+	}
+
+	.terminal-dot:nth-child(2) {
+		background-color: #ffbd2e;
+	}
+
+	.terminal-dot:nth-child(3) {
+		background-color: #27c93f;
+	}
+
+	.terminal-title {
+		margin-left: auto;
+		font-size: clamp(0.6rem, 2vw, 0.75rem);
+		color: var(--text-secondary);
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		white-space: nowrap;
+		flex-shrink: 0;
+	}
+
+	.terminal-body {
+		padding: clamp(1rem, 4vw, 2rem) clamp(0.75rem, 3vw, 1.5rem);
+		font-size: clamp(0.85rem, 2.5vw, 1rem);
+		height: clamp(400px, 60vh, 600px);
+		max-height: clamp(400px, 60vh, 600px);
+		width: 100%;
+		overflow-x: hidden;
+		overflow-y: auto;
+		box-sizing: border-box;
+	}
+
+	.terminal-line {
+		margin-bottom: clamp(0.5rem, 2vw, 1rem);
+		display: flex;
+		align-items: baseline;
+		gap: clamp(0.25rem, 1vw, 0.5rem);
+		min-height: 1.5em;
+		width: 100%;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+		box-sizing: border-box;
+		max-width: 100%;
+	}
+
+	.terminal-line > * {
+		max-width: 100%;
+		box-sizing: border-box;
+	}
+
+	.prompt {
+		color: var(--prompt-color);
+		font-weight: 500;
+		user-select: none;
+		flex-shrink: 0;
+	}
+
+	.command {
+		color: var(--command-color);
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+		flex: 1;
+		min-width: 0;
+		max-width: 100%;
+	}
+
+	.command-input {
+		background: transparent;
+		border: none;
+		outline: none;
+		color: var(--command-color);
+		font-family: 'Pixel Operator Mono', 'Courier New', monospace;
+		font-size: inherit;
+		flex: 1;
+		min-width: 0;
+		max-width: 100%;
+		width: 100%;
+		padding: 0;
+		margin: 0;
+		caret-color: var(--accent);
+		line-height: inherit;
+		height: auto;
+		vertical-align: baseline;
+	}
+
+	.command-input:focus + .cursor {
+		display: none;
+	}
+
+	.command-input:not(:focus) + .cursor {
+		display: inline;
+	}
+
+	.interactive-line {
+		position: relative;
+	}
+
+	#command-output {
+		width: 100%;
+	}
+
+	.autocomplete-suggestions {
+		width: 100%;
+		margin-top: 0.25rem;
+		max-height: 150px;
+		overflow-y: auto;
+		display: none;
+		border: 1px solid var(--border-color);
+		border-radius: 4px;
+		background-color: var(--terminal-bg);
+	}
+
+	.autocomplete-suggestion {
+		padding: 0.4rem 0.75rem;
+		color: var(--text-secondary);
+		font-size: 0.9em;
+		cursor: pointer;
+		transition: background-color 0.2s ease;
+		border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+	}
+
+	.autocomplete-suggestion:last-child {
+		border-bottom: none;
+	}
+
+	.autocomplete-suggestion:hover,
+	.autocomplete-suggestion.selected {
+		background-color: rgba(125, 211, 160, 0.15);
+		color: var(--accent);
+	}
+
+	.autocomplete-suggestion strong {
+		color: var(--command-color);
+		font-weight: 500;
+	}
+
+	.autocomplete-suggestion.selected strong {
+		color: var(--accent);
+	}
+
+	.command-output-line {
+		margin-bottom: 0.25rem;
+		color: var(--text-secondary);
+		font-size: inherit;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+		max-width: 100%;
+		padding-left: 0;
+	}
+
+	.terminal-line + .command-output-line {
+		margin-top: 0.25rem;
+	}
+
+	.command-output-line:last-child {
+		margin-bottom: 0.5rem;
+	}
+
+	.command-output-line.error {
+		color: #ff6b6b;
+	}
+
+	.command-output-line.success {
+		color: var(--accent);
+	}
+
+	.output {
+		color: var(--text-primary);
+		font-size: clamp(1.25rem, 5vw + 0.5rem, 2.5rem);
+		font-weight: 400;
+		letter-spacing: -0.02em;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+		max-width: 100%;
+		line-height: 1.2;
+	}
+
+	.output-secondary {
+		color: var(--text-secondary);
+		font-size: clamp(0.8rem, 2.5vw + 0.25rem, 1.1rem);
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+		max-width: 100%;
+		line-height: 1.5;
+	}
+
+	.output-accent {
+		color: var(--accent);
+		font-size: clamp(1rem, 3.5vw + 0.5rem, 1.5rem);
+		font-weight: 400;
+		letter-spacing: 0.02em;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+		max-width: 100%;
+		line-height: 1.3;
+	}
+
+	.cursor {
+		color: var(--accent);
+		animation: blink 1s infinite;
+		font-weight: 500;
+		flex-shrink: 0;
+		line-height: inherit;
+		vertical-align: baseline;
+		display: inline-block;
+	}
+
+	.cursor.blink {
+		animation: blink 1s infinite;
+	}
+
+	@keyframes blink {
+		0%, 50% { opacity: 1; }
+		51%, 100% { opacity: 0; }
+	}
+
+	#projects-output {
+		list-style: none;
+		padding-left: 0;
+	}
+
+	#projects-output li {
+		color: var(--text-secondary);
+		margin-bottom: clamp(0.5rem, 2vw, 0.75rem);
+		padding-left: clamp(0.75rem, 2vw, 1rem);
+		position: relative;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+		max-width: 100%;
+	}
+
+	#projects-output li::before {
+		content: '▸';
+		position: absolute;
+		left: 0;
+		color: var(--accent);
+	}
+
+	#projects-output li strong {
+		color: var(--text-primary);
+		font-weight: 500;
+	}
+
+	footer {
+		margin-top: clamp(1rem, 4vw, 2rem);
+		padding-top: clamp(1rem, 3vw, 1.5rem);
+		border-top: 1px solid var(--border-color);
+		text-align: center;
+		width: 100%;
+	}
+
+	footer a {
+		color: var(--text-secondary);
+		text-decoration: none;
+		font-family: 'Pixel Operator Mono', 'Courier New', monospace;
+		font-size: clamp(0.75rem, 2vw, 0.9rem);
+		transition: color 0.2s ease;
+		display: inline-flex;
+		align-items: center;
+		gap: clamp(0.25rem, 1vw, 0.5rem);
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+		max-width: 100%;
+	}
+
+	footer a:hover {
+		color: var(--accent);
+	}
+
+	footer .prompt {
+		color: var(--prompt-color);
+	}
+
+	.hidden {
+		opacity: 0;
+	}
+
+	@media (max-width: 768px) {
+		.terminal-body {
+			height: clamp(300px, 50vh, 500px);
+			max-height: clamp(300px, 50vh, 500px);
+		}
+
+		.terminal-line {
+			flex-wrap: wrap;
+		}
+
+		.output,
+		.output-secondary,
+		.output-accent {
+			width: 100%;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.terminal-line {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+
+		.terminal-line .prompt {
+			margin-bottom: 0.25rem;
+		}
+
+		.hero-line,
+		#description-line {
+			flex-direction: row;
+		}
+	}
+</style>
+
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+		const hasVisited = sessionStorage.getItem('hasVisited');
+		const shouldAnimate = !hasVisited;
+
+		const initialCommands = [
+			{ element: 'command-1', text: 'whoami', delay: 500 },
+			{ element: 'command-2', text: 'ls', delay: 2000 }
+		];
+
+		const outputs = {
+			name: { element: 'name-output', text: 'aleregex', delay: 1000 },
+			description: { 
+				element: 'description-output', 
+				text: 'Software developer · Full Stack · Blockchain · AI',
+				delay: 1500
+			},
+			about: {
+				element: 'about-output',
+				text: 'I’m a software developer focused on building modern web products with a strong interest in blockchain and artificial intelligence.',
+				delay: 2500
+			},
+			projects: [
+				{ 
+					name: 'aleregex-portfolio', 
+					desc: 'Personal portfolio with interactive terminal',
+					details: 'Minimalist landing page built with Astro. Interactive retro-technical terminal with custom commands. Technologies: Astro, TypeScript, vanilla CSS.'
+				},
+				{ 
+					name: 'blockchain-explorer', 
+					desc: 'Blockchain explorer with real-time visualization',
+					details: 'Web application to explore blockchain transactions. Real-time data visualization, interactive charts, and advanced search. Technologies: Next.js, TypeScript, Web3.js, Chart.js.'
+				}
+			]
+		};
+
+		const typeWriter = (element: string, text: string, speed: number = 50, callback?: () => void) => {
+			const el = document.getElementById(element);
+			if (!el) return;
+			
+			el.textContent = '';
+			let index = 0;
+			
+			const type = () => {
+				if (index < text.length) {
+					el.textContent += text[index];
+					index++;
+					setTimeout(type, speed);
+				} else if (callback) {
+					callback();
+				}
+			};
+			
+			type();
+		};
+
+		const hideCursor = (id: string) => {
+			const cursor = document.getElementById(id);
+			if (cursor) cursor.style.display = 'none';
+		};
+
+		const showLine = (id: string) => {
+			const line = document.getElementById(id);
+			if (line) line.classList.remove('hidden');
+		};
+
+		if (shouldAnimate) {
+			// Secuencia 1: whoami -> nombre -> descripción
+			const startSequence1 = () => {
+				showLine('command-line-1');
+				typeWriter('command-1', initialCommands[0].text, 80, () => {
+					setTimeout(() => {
+						hideCursor('cursor-1');
+						setTimeout(() => {
+							showLine('hero-line');
+							typeWriter('name-output', outputs.name.text, 100, () => {
+								setTimeout(() => {
+									showLine('description-line');
+									typeWriter('description-output', outputs.description.text, 30, () => {
+										// Cuando termina la secuencia 1, iniciar secuencia 2
+										setTimeout(() => {
+											startSequence2();
+										}, 500);
+									});
+								}, 300);
+							});
+						}, 300);
+					}, 300);
+				});
+			};
+
+			// Secuencia 2: Mostrar about directamente, luego ls -> Projects -> lista -> input
+			const startSequence2 = () => {
+				// Mostrar about sin comando
+				setTimeout(() => {
+					showLine('about-line');
+					setTimeout(() => {
+						showLine('about-text-line');
+						typeWriter('about-output', outputs.about.text, 20, () => {
+							// Cuando termina about, iniciar secuencia con ls
+							setTimeout(() => {
+								showLine('command-line-2');
+								typeWriter('command-2', initialCommands[1].text, 80, () => {
+									setTimeout(() => {
+										hideCursor('cursor-2');
+										setTimeout(() => {
+											showLine('projects-line');
+											setTimeout(() => {
+												showLine('projects-list');
+												const projectsEl = document.getElementById('projects-output');
+												if (projectsEl) {
+													let projectIndex = 0;
+													const addNextProject = () => {
+														if (projectIndex < outputs.projects.length) {
+															const project = outputs.projects[projectIndex];
+															const li = document.createElement('li');
+															li.innerHTML = `<strong>${project.name}</strong> — ${project.desc}`;
+															projectsEl.appendChild(li);
+															projectIndex++;
+															setTimeout(addNextProject, 200);
+														} else {
+															// Cuando terminan todos los proyectos, mostrar input
+															setTimeout(() => {
+																showLine('interactive-line');
+																const input = document.getElementById('command-input') as HTMLInputElement;
+																if (input) {
+																	input.focus();
+																}
+																sessionStorage.setItem('hasVisited', 'true');
+															}, 300);
+														}
+													};
+													addNextProject();
+												}
+											}, 300);
+										}, 300);
+									}, 300);
+								});
+							}, 500);
+						});
+					}, 300);
+				}, 500);
+			};
+
+			// Iniciar la primera secuencia después de un pequeño delay inicial
+			setTimeout(() => {
+				startSequence1();
+			}, 500);
+		} else {
+			// Mostrar todo instantáneamente
+			showLine('command-line-1');
+			const cmd1El = document.getElementById('command-1');
+			if (cmd1El) cmd1El.textContent = initialCommands[0].text;
+			hideCursor('cursor-1');
+
+			showLine('hero-line');
+			const nameEl = document.getElementById('name-output');
+			if (nameEl) nameEl.textContent = outputs.name.text;
+
+			showLine('description-line');
+			const descEl = document.getElementById('description-output');
+			if (descEl) descEl.textContent = outputs.description.text;
+
+			showLine('about-line');
+			showLine('about-text-line');
+			const aboutEl = document.getElementById('about-output');
+			if (aboutEl) aboutEl.textContent = outputs.about.text;
+
+			showLine('command-line-2');
+			const cmd2El = document.getElementById('command-2');
+			if (cmd2El) cmd2El.textContent = initialCommands[1].text;
+			hideCursor('cursor-2');
+
+			showLine('projects-line');
+			showLine('projects-list');
+			const projectsEl = document.getElementById('projects-output');
+			if (projectsEl) {
+				outputs.projects.forEach(project => {
+					const li = document.createElement('li');
+					li.innerHTML = `<strong>${project.name}</strong> — ${project.desc}`;
+					projectsEl.appendChild(li);
+				});
+			}
+
+			showLine('interactive-line');
+		}
+
+		// Terminal interactiva
+		const commandInput = document.getElementById('command-input') as HTMLInputElement;
+		const commandOutput = document.getElementById('command-output');
+		const terminalBody = document.querySelector('.terminal-body');
+		
+		if (!commandInput || !commandOutput || !terminalBody) return;
+
+		let commandHistory: string[] = [];
+		let historyIndex = -1;
+		let currentCommand = '';
+		let autocompleteIndex = -1;
+		let currentSuggestions: string[] = [];
+
+		const projectsData = [
+			{ 
+				name: 'aleregex-portfolio', 
+				desc: 'Personal portfolio with interactive terminal',
+				details: 'Minimalist landing page built with Astro. Interactive retro-technical terminal with custom commands. Technologies: Astro, TypeScript, vanilla CSS.'
+			},
+			{ 
+				name: 'blockchain-explorer', 
+				desc: 'Blockchain explorer with real-time visualization',
+				details: 'Web application to explore blockchain transactions. Real-time data visualization, interactive charts, and advanced search. Technologies: Next.js, TypeScript, Web3.js, Chart.js.'
+			}
+		];
+
+		const commands: Record<string, (args?: string) => string> = {
+			help: () => {
+				return `Available commands:
+
+  • help              Show this help message
+  • clear             Clear the console
+  • reset             Reset the terminal
+  • whoami            Show user information
+  • ls                List all projects
+  • cd <name>         Enter a project directory
+  • github            Open my GitHub
+
+Type a command and press Enter to execute it.`;
+			},
+			clear: () => {
+				// Eliminar todas las líneas dinámicas (comandos y resultados) excepto el input
+				const interactiveLine = commandInput.parentElement as HTMLElement;
+				const allLines = terminalBody.querySelectorAll('.terminal-line, .command-output-line');
+				allLines.forEach((line) => {
+					// No eliminar el input interactivo ni las líneas iniciales
+					if (!line.contains(commandInput) && 
+					    !line.id?.startsWith('command-line-') && 
+					    !line.id?.startsWith('hero-') && 
+					    !line.id?.startsWith('description-') &&
+					    !line.id?.startsWith('about-') &&
+					    !line.id?.startsWith('projects-')) {
+						line.remove();
+					}
+				});
+				return '';
+			},
+			reset: () => {
+				// Eliminar todas las líneas dinámicas (solo comandos ejecutados y sus resultados)
+				const allLines = terminalBody.querySelectorAll('.terminal-line, .command-output-line');
+				allLines.forEach((line) => {
+					if (!line.contains(commandInput) && 
+					    !line.id?.startsWith('command-line-') && 
+					    !line.id?.startsWith('hero-') && 
+					    !line.id?.startsWith('description-') &&
+					    !line.id?.startsWith('about-') &&
+					    !line.id?.startsWith('projects-')) {
+						line.remove();
+					}
+				});
+				commandHistory = [];
+				historyIndex = -1;
+				return 'Terminal reset.';
+			},
+			whoami: () => {
+				return 'aleregex';
+			},
+			ls: () => {
+				return projectsData.map(p => `${p.name} — ${p.desc}`).join('\n');
+			},
+			cd: (args?: string) => {
+				if (!args || !args.trim()) {
+					return 'Usage: cd <project-name>\nExample: cd aleregex-portfolio';
+				}
+				const projectName = args.trim().toLowerCase();
+				const project = projectsData.find(p => p.name.toLowerCase() === projectName);
+				if (project) {
+					return `${project.name}\n${project.desc}\n\n${project.details}`;
+				}
+				return `Project "${args}" not found.\nUse "ls" to see the list.`;
+			},
+			github: () => {
+				window.open('https://github.com/aleregex', '_blank');
+				return 'Opening GitHub...';
+			}
+		};
+
+		const executeCommand = (cmd: string) => {
+			const trimmedCmd = cmd.trim();
+			
+			if (!trimmedCmd) {
+				return '';
+			}
+
+			// Agregar al historial
+			if (commandHistory.length === 0 || commandHistory[commandHistory.length - 1] !== cmd) {
+				commandHistory.push(cmd);
+				if (commandHistory.length > 50) {
+					commandHistory.shift();
+				}
+			}
+			historyIndex = commandHistory.length;
+
+			// Parsear comando y argumentos
+			const parts = trimmedCmd.split(/\s+/);
+			const commandName = parts[0].toLowerCase();
+			const args = parts.slice(1).join(' ');
+
+			// Ejecutar comando
+			if (commands[commandName]) {
+				return commands[commandName](args);
+			} else {
+				return `Command not found: ${parts[0]}. Type "help" to see available commands.`;
+			}
+		};
+
+		const addOutputLine = (text: string, isError = false, insertAfter?: HTMLElement) => {
+			if (!text) return;
+			
+			// Dividir por saltos de línea y crear elementos separados
+			const lines = text.split('\n');
+			lines.forEach((lineText) => {
+				const line = document.createElement('div');
+				line.className = `command-output-line ${isError ? 'error' : ''}`;
+				
+				// Formatear líneas con colores para mejor legibilidad
+				if (lineText.trim().startsWith('•')) {
+					// Líneas de comandos en help - formato: • comando    descripción
+					const match = lineText.match(/^(\s*•\s+)(\S+)(\s{2,})(.+)$/);
+					if (match) {
+						line.innerHTML = `<span style="color: var(--accent);">${match[1]}</span><span style="color: var(--command-color); font-weight: 500;">${match[2]}</span><span style="color: var(--text-secondary);">${match[3]}${match[4]}</span>`;
+					} else {
+						line.textContent = lineText;
+					}
+				} else if (lineText.includes('Available commands:') || lineText.includes('Type a command')) {
+					// Títulos y mensajes importantes
+					line.style.color = 'var(--accent)';
+					line.style.fontWeight = '500';
+					line.textContent = lineText;
+				} else if (lineText.trim().startsWith('Usage:') || lineText.trim().startsWith('Example:')) {
+					// Mensajes de uso
+					const colonIndex = lineText.indexOf(':');
+					if (colonIndex > 0) {
+						line.innerHTML = `<span style="color: var(--accent); font-weight: 500;">${lineText.substring(0, colonIndex + 1)}</span><span style="color: var(--text-secondary);">${lineText.substring(colonIndex + 1)}</span>`;
+					} else {
+						line.textContent = lineText;
+					}
+				} else {
+					line.textContent = lineText;
+				}
+				
+				if (insertAfter) {
+					// Insertar después del elemento especificado
+					insertAfter.insertAdjacentElement('afterend', line);
+					insertAfter = line; // Actualizar referencia para siguiente línea
+				} else {
+					// Si no hay referencia, agregar al final del output
+					commandOutput.appendChild(line);
+				}
+			});
+			
+			// Scroll al final
+			terminalBody.scrollTop = terminalBody.scrollHeight;
+		};
+
+		const createCommandLine = (cmd: string) => {
+			const line = document.createElement('div');
+			line.className = 'terminal-line';
+			line.innerHTML = `
+				<span class="prompt">$</span>
+				<span class="command">${cmd}</span>
+			`;
+			return line;
+		};
+
+		const autocompleteSuggestions = document.getElementById('autocomplete-suggestions');
+		
+		const showAutocomplete = (query: string) => {
+			if (!autocompleteSuggestions) return;
+			
+			const parts = query.trim().split(/\s+/);
+			if (parts[0]?.toLowerCase() === 'cd' && parts.length >= 2) {
+				const searchTerm = parts.slice(1).join(' ').toLowerCase();
+				const matches = projectsData.filter(p => 
+					p.name.toLowerCase().startsWith(searchTerm)
+				).map(p => p.name);
+				
+				if (matches.length > 0) {
+					currentSuggestions = matches;
+					autocompleteSuggestions.innerHTML = '';
+					matches.forEach((match, idx) => {
+						const suggestion = document.createElement('div');
+						suggestion.className = `autocomplete-suggestion ${idx === 0 ? 'selected' : ''}`;
+						suggestion.innerHTML = `<strong>cd ${match}</strong>`;
+						suggestion.addEventListener('click', () => {
+							commandInput.value = `cd ${match}`;
+							hideAutocomplete();
+							commandInput.focus();
+						});
+						autocompleteSuggestions.appendChild(suggestion);
+					});
+					autocompleteSuggestions.style.display = 'block';
+					autocompleteIndex = 0;
+				} else {
+					hideAutocomplete();
+				}
+			} else {
+				hideAutocomplete();
+			}
+		};
+
+		const hideAutocomplete = () => {
+			if (autocompleteSuggestions) {
+				autocompleteSuggestions.style.display = 'none';
+				autocompleteSuggestions.innerHTML = '';
+				currentSuggestions = [];
+				autocompleteIndex = -1;
+			}
+		};
+
+		const updateAutocompleteSelection = () => {
+			if (!autocompleteSuggestions) return;
+			const suggestions = autocompleteSuggestions.querySelectorAll('.autocomplete-suggestion');
+			suggestions.forEach((suggestion, idx) => {
+				if (idx === autocompleteIndex) {
+					suggestion.classList.add('selected');
+					suggestion.scrollIntoView({ block: 'nearest' });
+				} else {
+					suggestion.classList.remove('selected');
+				}
+			});
+		};
+
+		commandInput.addEventListener('input', () => {
+			currentCommand = commandInput.value;
+			showAutocomplete(commandInput.value);
+		});
+
+		commandInput.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				
+				// Si hay autocompletado activo y una sugerencia seleccionada
+				if (autocompleteIndex >= 0 && currentSuggestions.length > 0) {
+					const selectedProject = currentSuggestions[autocompleteIndex];
+					commandInput.value = `cd ${selectedProject}`;
+					hideAutocomplete();
+				}
+				
+				const cmd = commandInput.value.trim();
+				
+				if (cmd) {
+					// Crear línea con el comando ejecutado
+					const cmdLine = createCommandLine(cmd);
+					const interactiveLine = commandInput.parentElement as HTMLElement;
+					terminalBody.insertBefore(cmdLine, interactiveLine);
+					
+					// Ejecutar comando y mostrar resultado justo después del comando
+					const result = executeCommand(cmd);
+					if (result) {
+						addOutputLine(result, false, cmdLine);
+					}
+					
+					// Limpiar input
+					commandInput.value = '';
+					currentCommand = '';
+					hideAutocomplete();
+					
+					// Scroll al final
+					setTimeout(() => {
+						terminalBody.scrollTop = terminalBody.scrollHeight;
+					}, 10);
+				}
+			} else if (e.key === 'Tab') {
+				e.preventDefault();
+				// Autocompletar con la primera sugerencia
+				if (autocompleteIndex >= 0 && currentSuggestions.length > 0) {
+					const selectedProject = currentSuggestions[autocompleteIndex];
+					const parts = commandInput.value.trim().split(/\s+/);
+					if (parts[0]?.toLowerCase() === 'cd') {
+						commandInput.value = `cd ${selectedProject}`;
+						hideAutocomplete();
+					}
+				}
+			} else if (e.key === 'ArrowUp') {
+				e.preventDefault();
+				if (autocompleteSuggestions?.style.display === 'block' && currentSuggestions.length > 0) {
+					// Navegar en autocompletado
+					autocompleteIndex = autocompleteIndex > 0 ? autocompleteIndex - 1 : currentSuggestions.length - 1;
+					updateAutocompleteSelection();
+				} else if (commandHistory.length > 0) {
+					if (historyIndex > 0) {
+						historyIndex--;
+					}
+					const historyCmd = commandHistory[historyIndex];
+					commandInput.value = historyCmd !== undefined ? historyCmd : '';
+				}
+			} else if (e.key === 'ArrowDown') {
+				e.preventDefault();
+				if (autocompleteSuggestions?.style.display === 'block' && currentSuggestions.length > 0) {
+					// Navegar en autocompletado
+					autocompleteIndex = autocompleteIndex < currentSuggestions.length - 1 ? autocompleteIndex + 1 : 0;
+					updateAutocompleteSelection();
+				} else if (historyIndex < commandHistory.length - 1) {
+					historyIndex++;
+					const historyCmd = commandHistory[historyIndex];
+					commandInput.value = historyCmd !== undefined ? historyCmd : '';
+				} else {
+					historyIndex = commandHistory.length;
+					commandInput.value = currentCommand;
+				}
+			} else if (e.key === 'Escape') {
+				hideAutocomplete();
+			} else {
+				currentCommand = commandInput.value;
+			}
+		});
+
+		// Focus automático cuando se hace clic en la terminal
+		terminalBody.addEventListener('click', () => {
+			commandInput.focus();
+		});
+
+		// Focus inicial después de la animación
+		if (!shouldAnimate) {
+			setTimeout(() => {
+				commandInput.focus();
+			}, 100);
+		}
+	});
+</script>

@@ -1,1 +1,4 @@
-@import "tailwindcss";
+/* Reset básico para evitar conflictos */
+* {
+	box-sizing: border-box;
+}
