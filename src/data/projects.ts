@@ -13,8 +13,8 @@ export interface Project {
 }
 
 export const projects: Record<string, Project> = {
-	'aleregex-portfolio': {
-		name: 'aleregex-portfolio',
+	'portfolio': {
+		name: 'portfolio',
 		desc: 'Personal portfolio with interactive terminal',
 		logo: 'aleregex-logo.png',
 		details: `## What the product does

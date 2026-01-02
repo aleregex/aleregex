@@ -64,11 +64,13 @@ const { showFooter = true } = Astro.props;
 		transform: translateX(-50%);
 		margin-top: 1rem;
 		padding: 1rem;
-		border-top: 1px solid #30363d;
+		border-top: 1px solid rgba(125, 211, 160, 0.2);
 		text-align: center;
 		width: min(900px, calc(100% - 2rem));
 		max-width: min(900px, calc(100% - 2rem));
-		background-color: #0a0a0a;
+		background: rgba(10, 10, 10, 0.7);
+		backdrop-filter: blur(20px) saturate(180%);
+		-webkit-backdrop-filter: blur(20px) saturate(180%);
 		z-index: 1000;
 	}
 
