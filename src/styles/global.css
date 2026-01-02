@@ -162,6 +162,36 @@ main {
 	flex-shrink: 0;
 }
 
+.terminal-spacer {
+	flex: 1;
+}
+
+.terminal-social {
+	display: flex;
+	align-items: center;
+	gap: clamp(0.35rem, 1.2vw, 0.6rem);
+}
+
+.terminal-social a {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: clamp(2rem, 4vw, 2.4rem);
+	height: clamp(2rem, 4vw, 2.4rem);
+	border-radius: 6px;
+	color: var(--accent);
+	background: rgba(125, 211, 160, 0.08);
+	border: 1px solid rgba(125, 211, 160, 0.2);
+	transition: all 0.2s ease;
+	text-decoration: none;
+}
+
+.terminal-social a:hover {
+	background: rgba(125, 211, 160, 0.16);
+	border-color: var(--accent);
+	transform: translateY(-1px);
+}
+
 @media (max-width: 768px) {
 	.terminal-header {
 		background: rgba(22, 27, 34, 0.8) !important;
@@ -191,10 +221,10 @@ main {
 }
 
 .terminal-title {
-	margin-left: auto;
+	margin-left: clamp(0.5rem, 1.5vw, 0.75rem);
 	font-size: clamp(0.6rem, 2vw, 0.75rem);
 	color: var(--text-secondary);
-	text-transform: uppercase;
+	/* text-transform: uppercase; */
 	letter-spacing: 0.1em;
 	white-space: nowrap;
 	flex-shrink: 0;
@@ -220,7 +250,7 @@ main {
 	.terminal-body {
 		padding: 1.5rem 1.25rem;
 		padding-bottom: 3rem;
-		font-size: 1.25rem;
+		font-size: clamp(0.95rem, 2.5vw, 1.05rem);
 	}
 }
 
@@ -228,7 +258,7 @@ main {
 	.terminal-body {
 		padding: 1.25rem 1rem;
 		padding-bottom: 3rem;
-		font-size: 1.3rem;
+		font-size: clamp(0.95rem, 3vw, 1.05rem);
 	}
 }
 
@@ -369,17 +399,22 @@ main {
 	margin-bottom: clamp(0.75rem, 2.5vw, 1.25rem) !important;
 }
 
+#about-line {
+	margin-top: clamp(1rem, 3vw, 1.5rem) !important;
+	margin-bottom: clamp(0.35rem, 1.2vw, 0.65rem) !important;
+}
+
 @media (max-width: 768px) {
 	.output {
-		font-size: 2.5rem;
+		font-size: clamp(1.6rem, 5vw, 2rem);
 	}
 
 	.output-secondary {
-		font-size: 1.25rem;
+		font-size: clamp(0.95rem, 3vw, 1.1rem);
 	}
 
 	.output-accent {
-		font-size: 1.6rem;
+		font-size: clamp(1.2rem, 4vw, 1.5rem);
 	}
 
 	.output,
@@ -391,15 +426,15 @@ main {
 
 @media (max-width: 480px) {
 	.output {
-		font-size: 2.75rem;
+		font-size: clamp(1.7rem, 6vw, 2.1rem);
 	}
 
 	.output-secondary {
-		font-size: 1.3rem;
+		font-size: clamp(1rem, 3.5vw, 1.15rem);
 	}
 
 	.output-accent {
-		font-size: 1.75rem;
+		font-size: clamp(1.3rem, 4.5vw, 1.6rem);
 	}
 }
 
@@ -484,13 +519,13 @@ main {
 
 @media (max-width: 768px) {
 	.command-output-line {
-		font-size: 1.25rem;
+		font-size: clamp(0.95rem, 2.6vw, 1.05rem);
 	}
 }
 
 @media (max-width: 480px) {
 	.command-output-line {
-		font-size: 1.3rem;
+		font-size: clamp(0.95rem, 3vw, 1.05rem);
 	}
 }
 

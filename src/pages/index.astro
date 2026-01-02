@@ -104,7 +104,7 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
       },
       about: {
         element: "about-output",
-        text: "I’m a software developer focused on building modern web products with a strong interest in blockchain and artificial intelligence.",
+        text: "I’m a software developer focused on building modern web products with deep expertise in blockchain and artificial intelligence.",
         delay: 2500,
       },
       projects: [
@@ -245,7 +245,7 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
                           const line = document.createElement("div");
                           line.className = "command-output-line";
                           const projectLink = document.createElement("a");
-                          projectLink.href = `/projects/${project.name}`;
+                          projectLink.href = `/projects/${project.name.toLowerCase()}`;
                           projectLink.style.cssText =
                             "color: var(--accent); font-weight: 500; text-decoration: none; cursor: pointer;";
                           projectLink.textContent = project.name;
@@ -340,7 +340,7 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
           const line = document.createElement("div");
           line.className = "command-output-line";
           const projectLink = document.createElement("a");
-          projectLink.href = `/projects/${project.name}`;
+          projectLink.href = `/projects/${project.name.toLowerCase()}`;
           projectLink.style.cssText =
             "color: var(--accent); font-weight: 500; text-decoration: none; cursor: pointer;";
           projectLink.textContent = project.name;
@@ -386,12 +386,32 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
           "Minimalist landing page built with Astro. Interactive retro-technical terminal with custom commands. Technologies: Astro, TypeScript, vanilla CSS.",
       },
       {
-        name: "Vaquita",
+        name: "vaquita",
         desc: "Gamified savings application",
         details:
           "Gamified savings application with visual state system. Technologies: Next.js 14, TypeScript, Tailwind CSS, React Three Fiber, Web3 tooling.",
       },
     ];
+
+
+    const openProject = (args?: string) => {
+      if (!args || !args.trim()) {
+        return "Usage: vim <project-name>\nExample: vim portfolio";
+      }
+      const projectName = args.trim().toLowerCase();
+      const project = projectsData.find(
+        (p) => p.name.toLowerCase() === projectName
+      );
+      if (project) {
+        // Redirigir a la página del proyecto (slug en minúsculas)
+        setTimeout(() => {
+          window.location.href = `/projects/${project.name.toLowerCase()}`;
+        }, 300);
+        return `Opening ${project.name} with vim...`;
+      }
+      return `Project "${args}" not found.\nUse "ls" to see the list.`;
+    };
+
 
     const commands: Record<string, (args?: string) => string> = {
       help: () => {
@@ -401,7 +421,7 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
   • clear             Clear the console
   • whoami            Show user information
   • ls                List all projects
-  • cat <name>        View project details
+  • vim <name>        Open project
 
 Type a command and press Enter to execute it.`;
       },
@@ -441,23 +461,8 @@ Type a command and press Enter to execute it.`;
       ls: () => {
         return projectsData.map((p) => `${p.name} — ${p.desc}`).join("\n");
       },
-      cat: (args?: string) => {
-        if (!args || !args.trim()) {
-          return "Usage: cat <project-name>\nExample: cat portfolio";
-        }
-        const projectName = args.trim().toLowerCase();
-        const project = projectsData.find(
-          (p) => p.name.toLowerCase() === projectName
-        );
-        if (project) {
-          // Redirigir a la página del proyecto
-          setTimeout(() => {
-            window.location.href = `/projects/${project.name}`;
-          }, 300);
-          return `Opening ${project.name}...`;
-        }
-        return `Project "${args}" not found.\nUse "ls" to see the list.`;
-      },
+      vim: openProject,
+      cat: openProject,
     };
 
     const executeCommand = (cmd: string) => {
@@ -541,7 +546,7 @@ Type a command and press Enter to execute it.`;
             const project = projectsData.find((p) => p.name === projectName);
             if (project) {
               const projectLink = document.createElement("a");
-              projectLink.href = `/projects/${project.name}`;
+              projectLink.href = `/projects/${project.name.toLowerCase()}`;
               projectLink.style.cssText =
                 "color: var(--accent); font-weight: 500; text-decoration: none; cursor: pointer;";
               projectLink.textContent = projectName;
@@ -663,7 +668,7 @@ Type a command and press Enter to execute it.`;
       if (!autocompleteSuggestions) return;
 
       const parts = query.trim().split(/\s+/);
-      if (parts[0]?.toLowerCase() === "cat" && parts.length >= 2) {
+      if (parts[0]?.toLowerCase() === "vim" && parts.length >= 2) {
         const searchTerm = parts.slice(1).join(" ").toLowerCase();
         const matches = projectsData
           .filter((p) => p.name.toLowerCase().startsWith(searchTerm))
@@ -675,9 +680,9 @@ Type a command and press Enter to execute it.`;
           matches.forEach((match, idx) => {
             const suggestion = document.createElement("div");
             suggestion.className = `autocomplete-suggestion ${idx === 0 ? "selected" : ""}`;
-            suggestion.innerHTML = `<strong>cat ${match}</strong>`;
+            suggestion.innerHTML = `<strong>vim ${match}</strong>`;
             suggestion.addEventListener("click", () => {
-              commandInput.value = `cat ${match}`;
+              commandInput.value = `vim ${match}`;
               hideAutocomplete();
               commandInput.focus();
             });
@@ -729,7 +734,7 @@ Type a command and press Enter to execute it.`;
         // Si hay autocompletado activo y una sugerencia seleccionada
         if (autocompleteIndex >= 0 && currentSuggestions.length > 0) {
           const selectedProject = currentSuggestions[autocompleteIndex];
-          commandInput.value = `cat ${selectedProject}`;
+          commandInput.value = `vim ${selectedProject}`;
           hideAutocomplete();
         }
 
@@ -771,8 +776,8 @@ Type a command and press Enter to execute it.`;
         if (autocompleteIndex >= 0 && currentSuggestions.length > 0) {
           const selectedProject = currentSuggestions[autocompleteIndex];
           const parts = commandInput.value.trim().split(/\s+/);
-          if (parts[0]?.toLowerCase() === "cat") {
-            commandInput.value = `cat ${selectedProject}`;
+          if (parts[0]?.toLowerCase() === "vim") {
+            commandInput.value = `vim ${selectedProject}`;
             hideAutocomplete();
           }
         }

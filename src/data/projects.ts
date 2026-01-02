@@ -66,7 +66,7 @@ The portfolio serves as both a showcase of my work and a demonstration of my tec
 		]
 	},
 	'vaquita': {
-		name: 'Vaquita',
+		name: 'vaquita',
 		desc: 'Gamified savings application',
 		logo: 'vaquita-logo.png',
 		details: `## What the product does
