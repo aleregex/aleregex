@@ -74,6 +74,12 @@ const { showFooter = true } = Astro.props;
 		z-index: 1000;
 	}
 
+	@media (max-width: 768px) {
+		.global-footer {
+			display: none;
+		}
+	}
+
 	.footer-command {
 		color: #8b949e;
 		font-family: 'Pixel Operator Mono', 'Courier New', monospace;
