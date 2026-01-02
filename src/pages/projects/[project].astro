@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { projects } from '../../data/projects';
+import { marked } from 'marked';
 
 export async function getStaticPaths() {
 	return Object.keys(projects).map((project) => ({
@@ -14,69 +15,134 @@ const projectData = projects[project as keyof typeof projects];
 if (!projectData) {
 	return Astro.redirect('/404');
 }
+
+// Configurar marked para renderizar markdown
+marked.setOptions({
+	gfm: true,
+	breaks: true
+});
+
+const htmlContent = marked.parse(projectData.details);
 ---
 
-<Layout>
+<Layout showFooter={false}>
 	<main>
-		<div class="project-container">
-			<nav class="back-nav">
-				<a href="/" class="back-link">
-					← Volver al inicio
-				</a>
-			</nav>
+		<div class="terminal">
+			<div class="terminal-header">
+				<span class="terminal-dot"></span>
+				<span class="terminal-dot"></span>
+				<span class="terminal-dot"></span>
+				<span class="terminal-title">terminal</span>
+			</div>
 			
-			<article class="project-content">
-				<header class="project-header">
-					<h1 class="project-title">{projectData.name}</h1>
-					<p class="project-subtitle">{projectData.desc}</p>
-				</header>
-				
-				<div class="project-body">
-					{'url' in projectData && projectData.url && (
-						<div class="project-section">
-							<a href={projectData.url} target="_blank" rel="noopener noreferrer" class="project-link">
-								<span>Visitar sitio web</span>
-								<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-									<path d="M6 3H3C2.44772 3 2 3.44772 2 4V13C2 13.5523 2.44772 14 3 14H12C12.5523 14 13 13.5523 13 13V10M10 2H14M14 2V6M14 2L6 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-								</svg>
-							</a>
-						</div>
-					)}
-					<div class="project-section">
-						<h2 class="section-title">Descripción</h2>
-						<p class="project-details">{projectData.details}</p>
-					</div>
+			<div class="terminal-body">
+				<div class="terminal-line">
+					<span class="prompt">$</span>
+					<span class="command">cat README.md</span>
 				</div>
-			</article>
+				
+				<div class="file-content">
+					<div class="file-header">
+						<div class="header-main">
+							<div class="header-content">
+								{projectData.logo && (
+									<img 
+										src={`/projects/${projectData.logo}`} 
+										alt={`${projectData.name} logo`}
+										class="project-logo"
+									/>
+								)}
+								<div class="header-text">
+									<h1 class="file-title">{projectData.name}</h1>
+									<p class="file-subtitle">{projectData.desc}</p>
+								</div>
+							</div>
+							{projectData.links && projectData.links.length > 0 && (
+								<div class="project-links">
+									{projectData.links.map((link) => (
+										<a 
+											href={link.url} 
+											target="_blank" 
+											rel="noopener noreferrer"
+											class="project-link"
+											title={link.label || link.type}
+										>
+											<span class="link-icon" data-type={link.type}>
+												{link.type === 'github' && (
+													<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+														<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+													</svg>
+												)}
+												{link.type === 'figma' && (
+													<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+														<path d="M15.852 8.981h-4.588V0h4.588c2.476 0 4.5 2.023 4.5 4.505 0 2.484-2.024 4.476-4.5 4.476zm-4.588-7.51v7.51h4.588c1.665 0 3.01-1.346 3.01-3.005s-1.345-3.005-3.01-3.005h-4.588zm0 15.019h4.588c2.476 0 4.5-1.992 4.5-4.476 0-2.483-2.024-4.505-4.5-4.505h-4.588v9.01zm0-11.514v7.51h4.588c1.665 0 3.01-1.346 3.01-3.005s-1.345-3.005-3.01-3.005h-4.588zm-4.587 7.51c0 2.483-2.023 4.505-4.5 4.505C2.023 18.49 0 16.468 0 13.985c0-2.484 2.023-4.476 4.5-4.476 2.477 0 4.5 1.992 4.5 4.476zm-4.5-7.51C2.165 3.97 0 6.136 0 8.981c0 2.846 2.165 5.01 4.852 5.01 1.218 0 2.313-.488 3.111-1.274-.311-1.49-1.516-2.666-3.111-2.666-.557 0-1.079.144-1.536.393v-3.48c.457-.248.979-.393 1.536-.393 1.595 0 2.8-1.176 3.111-2.666-.798-.786-1.893-1.274-3.111-1.274z"/>
+													</svg>
+												)}
+												{link.type === 'website' && (
+													<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+														<circle cx="12" cy="12" r="10"></circle>
+														<line x1="2" y1="12" x2="22" y2="12"></line>
+														<path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+													</svg>
+												)}
+												{link.type === 'demo' && (
+													<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+														<polygon points="5 3 19 12 5 21 5 3"></polygon>
+													</svg>
+												)}
+												{link.type === 'docs' && (
+													<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+														<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+														<polyline points="14 2 14 8 20 8"></polyline>
+														<line x1="16" y1="13" x2="8" y2="13"></line>
+														<line x1="16" y1="17" x2="8" y2="17"></line>
+														<polyline points="10 9 9 9 8 9"></polyline>
+													</svg>
+												)}
+												{link.type === 'youtube' && (
+													<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+														<path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+													</svg>
+												)}
+												{link.type === 'other' && (
+													<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+														<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+														<path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+													</svg>
+												)}
+											</span>
+										</a>
+									))}
+								</div>
+							)}
+						</div>
+					</div>
+					<div class="file-separator"></div>
+					<div class="file-body" set:html={htmlContent}></div>
+				</div>
+				
+				<div class="terminal-line interactive-line">
+					<span class="prompt">$</span>
+					<a href="/" class="back-link">
+						<span class="command">cd ..</span>
+					</a>
+				</div>
+			</div>
 		</div>
 	</main>
 </Layout>
 
 <style>
 	:root {
-		--bg-color: #ffffff;
-		--bg-secondary: #f8f9fa;
-		--text-primary: #1a1a1a;
-		--text-secondary: #6b7280;
-		--accent: #2563eb;
-		--accent-hover: #1d4ed8;
-		--border-color: #e5e7eb;
-		--shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-		--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-	}
-
-	@media (prefers-color-scheme: dark) {
-		:root {
-			--bg-color: #0f172a;
-			--bg-secondary: #1e293b;
-			--text-primary: #f1f5f9;
-			--text-secondary: #94a3b8;
-			--accent: #60a5fa;
-			--accent-hover: #3b82f6;
-			--border-color: #334155;
-			--shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-			--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
-		}
+		--bg-color: #0a0a0a;
+		--terminal-bg: #0d1117;
+		--text-primary: #c9d1d9;
+		--text-secondary: #8b949e;
+		--accent: #7dd3a0;
+		--accent-hover: #9ee4c0;
+		--prompt-color: #58a6ff;
+		--command-color: #f0883e;
+		--border-color: #30363d;
 	}
 
 	* {
@@ -86,164 +152,523 @@ if (!projectData) {
 	}
 
 	html {
-		scroll-behavior: smooth;
+		overflow: hidden;
+		width: 100%;
+		height: 100%;
+		max-width: 100vw;
+		max-height: 100vh;
 	}
 
 	body {
 		background-color: var(--bg-color);
 		color: var(--text-primary);
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+		font-family: 'Pixel Operator Mono', 'Courier New', monospace;
 		line-height: 1.6;
-		min-height: 100vh;
-		padding: 0;
+		height: 100vh;
+		overflow: hidden;
+		width: 100%;
+		max-width: 100vw;
 		margin: 0;
-		transition: background-color 0.3s ease, color 0.3s ease;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
 	}
 
 	main {
-		max-width: min(900px, 90%);
-		width: 100%;
-		margin: 0 auto;
-		padding: clamp(2rem, 5vw, 4rem) clamp(1.5rem, 4vw, 2rem);
-		min-height: 100vh;
-		box-sizing: border-box;
-	}
-
-	.project-container {
-		width: 100%;
-		animation: fadeIn 0.5s ease-in;
-	}
-
-	@keyframes fadeIn {
-		from {
-			opacity: 0;
-			transform: translateY(20px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	.back-nav {
-		margin-bottom: clamp(2rem, 5vw, 3rem);
-	}
-
-	.back-link {
-		color: var(--text-secondary);
-		text-decoration: none;
-		font-size: clamp(0.875rem, 2vw, 1rem);
-		display: inline-flex;
+		width: min(900px, calc(100% - 2rem));
+		height: 700px;
+		max-width: min(900px, calc(100% - 2rem));
+		max-height: 700px;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
 		align-items: center;
-		gap: 0.5rem;
-		transition: all 0.2s ease;
-		padding: 0.5rem 1rem;
-		border-radius: 0.5rem;
-		font-weight: 500;
+		flex-shrink: 0;
 	}
 
-	.back-link:hover {
-		color: var(--accent);
-		background-color: var(--bg-secondary);
-	}
-
-	.project-content {
+	.terminal {
+		background-color: var(--terminal-bg);
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		overflow: hidden;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 		width: 100%;
+		height: 600px;
+		max-width: 100%;
+		max-height: 600px;
+		display: flex;
+		flex-direction: column;
+		flex-shrink: 0;
 	}
 
-	.project-header {
-		margin-bottom: clamp(3rem, 6vw, 4rem);
-		padding-bottom: clamp(2rem, 4vw, 3rem);
-		border-bottom: 2px solid var(--border-color);
+	.terminal-header {
+		background-color: #161b22;
+		padding: clamp(0.5rem, 2vw, 0.75rem) clamp(0.75rem, 2vw, 1rem);
+		display: flex;
+		align-items: center;
+		gap: clamp(0.25rem, 1vw, 0.5rem);
+		border-bottom: 1px solid var(--border-color);
+		flex-wrap: nowrap;
+		flex-shrink: 0;
 	}
 
-	.project-title {
-		color: var(--text-primary);
-		font-size: clamp(2.5rem, 7vw, 4rem);
-		font-weight: 700;
-		letter-spacing: -0.03em;
-		margin-bottom: clamp(1rem, 3vw, 1.5rem);
-		line-height: 1.1;
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+	.terminal-dot {
+		width: clamp(8px, 2vw, 12px);
+		height: clamp(8px, 2vw, 12px);
+		border-radius: 50%;
+		background-color: #484f58;
+		flex-shrink: 0;
 	}
 
-	.project-subtitle {
+	.terminal-dot:nth-child(1) {
+		background-color: #ff5f56;
+	}
+
+	.terminal-dot:nth-child(2) {
+		background-color: #ffbd2e;
+	}
+
+	.terminal-dot:nth-child(3) {
+		background-color: #27c93f;
+	}
+
+	.terminal-title {
+		margin-left: auto;
+		font-size: clamp(0.6rem, 2vw, 0.75rem);
 		color: var(--text-secondary);
-		font-size: clamp(1.125rem, 3vw, 1.5rem);
-		line-height: 1.6;
-		font-weight: 400;
-		max-width: 700px;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		white-space: nowrap;
+		flex-shrink: 0;
 	}
 
-	.project-body {
+	.terminal-body {
+		padding: clamp(1rem, 4vw, 2rem) clamp(0.75rem, 3vw, 1.5rem);
+		font-size: clamp(0.85rem, 2.5vw, 1rem);
 		width: 100%;
+		overflow-x: hidden;
+		overflow-y: auto;
+		box-sizing: border-box;
+		scroll-behavior: smooth;
+		flex: 1;
+		min-height: 0;
 	}
 
-	.project-section {
-		margin-bottom: clamp(2rem, 4vw, 3rem);
-	}
-
-	.section-title {
-		color: var(--text-primary);
-		font-size: clamp(1.5rem, 4vw, 2rem);
-		font-weight: 600;
-		margin-bottom: clamp(1rem, 2vw, 1.5rem);
-		letter-spacing: -0.02em;
-	}
-
-	.project-details {
-		color: var(--text-primary);
-		font-size: clamp(1rem, 2.5vw, 1.125rem);
-		line-height: 1.8;
-		white-space: pre-wrap;
+	.terminal-line {
+		margin-bottom: clamp(0.75rem, 2.5vw, 1.25rem);
+		display: flex;
+		align-items: baseline;
+		gap: clamp(0.25rem, 1vw, 0.5rem);
+		min-height: 1.5em;
+		width: 100%;
 		word-wrap: break-word;
 		overflow-wrap: break-word;
-		max-width: 800px;
+		box-sizing: border-box;
+		max-width: 100%;
+	}
+
+	.prompt {
+		color: var(--prompt-color);
+		font-weight: 500;
+		user-select: none;
+		flex-shrink: 0;
+	}
+
+	.command {
+		color: var(--command-color);
+		font-weight: 500;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+	}
+
+	.file-content {
+		margin-top: clamp(0.5rem, 1.5vw, 0.75rem);
+		margin-bottom: clamp(1rem, 3vw, 1.5rem);
+	}
+
+	.file-line {
+		margin-bottom: clamp(0.75rem, 2vw, 1rem);
+		width: 100%;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+	}
+
+	.file-title {
+		color: var(--accent);
+		font-size: clamp(1.25rem, 4vw, 1.75rem);
+		font-weight: 400;
+		letter-spacing: -0.02em;
+		line-height: 1.2;
+		display: block;
+	}
+
+	.file-subtitle {
+		color: var(--text-secondary);
+		font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+		line-height: 1.5;
+		display: block;
+	}
+
+	.file-separator {
+		height: 1px;
+		background-color: var(--border-color);
+		margin: clamp(1rem, 3vw, 1.5rem) 0;
+		width: 100%;
+	}
+
+	.file-header {
+		margin-bottom: clamp(1rem, 3vw, 1.5rem);
+	}
+
+	.header-main {
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-start;
+		align-items: flex-start;
+		gap: clamp(1rem, 3vw, 2rem);
+		width: 100%;
+	}
+
+	.header-content {
+		display: flex;
+		flex-direction: row;
+		align-items: flex-start;
+		justify-content: flex-start;
+		gap: clamp(1rem, 2vw, 1.5rem);
+		flex: 1;
+		min-width: 0;
+	}
+
+	.project-logo {
+		width: clamp(5rem, 12vw, 7rem);
+		height: clamp(5rem, 12vw, 7rem);
+		object-fit: contain;
+		flex-shrink: 0;
+		border-radius: 8px;
+		background-color: rgba(125, 211, 160, 0.05);
+		padding: clamp(0.75rem, 2vw, 1rem);
+		border: 1px solid var(--border-color);
+	}
+
+	.header-text {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		justify-content: flex-start;
+		flex: 1;
+		min-width: 0;
+	}
+
+	.project-links {
+		display: flex;
+		gap: clamp(0.5rem, 1.5vw, 0.75rem);
+		flex-wrap: wrap;
+		align-items: flex-start;
+		justify-content: flex-start;
+		flex-shrink: 0;
 	}
 
 	.project-link {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.5rem;
-		color: var(--accent);
-		text-decoration: none;
-		font-size: clamp(1rem, 2.5vw, 1.125rem);
-		font-weight: 500;
-		padding: 0.75rem 1.5rem;
-		border: 2px solid var(--accent);
-		border-radius: 0.5rem;
+		justify-content: center;
+		width: clamp(2.25rem, 5vw, 2.75rem);
+		height: clamp(2.25rem, 5vw, 2.75rem);
+		border: 1px solid var(--border-color);
+		border-radius: 6px;
+		background-color: rgba(125, 211, 160, 0.05);
 		transition: all 0.2s ease;
-		margin-bottom: clamp(2rem, 4vw, 3rem);
+		text-decoration: none;
+		color: var(--text-primary);
+		cursor: pointer;
 	}
 
 	.project-link:hover {
-		background-color: var(--accent);
-		color: var(--bg-color);
+		background-color: rgba(125, 211, 160, 0.15);
+		border-color: var(--accent);
 		transform: translateY(-2px);
-		box-shadow: var(--shadow-lg);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 	}
 
-	.project-link svg {
-		transition: transform 0.2s ease;
+	.link-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: 100%;
+		color: var(--accent);
 	}
 
-	.project-link:hover svg {
-		transform: translate(2px, -2px);
+	.link-icon svg {
+		width: clamp(1rem, 2.5vw, 1.25rem);
+		height: clamp(1rem, 2.5vw, 1.25rem);
+	}
+
+	.file-body {
+		color: var(--text-primary);
+		font-size: clamp(0.85rem, 2vw, 1rem);
+		line-height: 1.8;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+	}
+
+	.file-body :global(h1) {
+		color: var(--accent);
+		font-size: clamp(1.5rem, 4vw, 2rem);
+		font-weight: 600;
+		margin-top: clamp(2rem, 5vw, 2.5rem);
+		margin-bottom: clamp(1rem, 2.5vw, 1.25rem);
+		line-height: 1.3;
+		border-bottom: 2px solid var(--accent);
+		padding-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
+	}
+
+	.file-body :global(h1:first-child) {
+		margin-top: 0;
+	}
+
+	.file-body :global(h2) {
+		color: var(--accent);
+		font-size: clamp(1.25rem, 3vw, 1.5rem);
+		font-weight: 600;
+		margin-top: clamp(2rem, 5vw, 2.5rem);
+		margin-bottom: clamp(0.75rem, 2vw, 1rem);
+		line-height: 1.4;
+		border-bottom: 1px solid var(--border-color);
+		padding-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
+	}
+
+	.file-body :global(h2:first-child) {
+		margin-top: 0;
+	}
+
+	.file-body :global(h3) {
+		color: var(--accent);
+		font-size: clamp(1rem, 2.5vw, 1.25rem);
+		font-weight: 500;
+		margin-top: clamp(1.5rem, 4vw, 2rem);
+		margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
+		line-height: 1.4;
+	}
+
+	.file-body :global(h4) {
+		color: var(--accent);
+		font-size: clamp(0.9rem, 2vw, 1.1rem);
+		font-weight: 500;
+		margin-top: clamp(1.25rem, 3vw, 1.5rem);
+		margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
+		line-height: 1.4;
+	}
+
+	.file-body :global(p) {
+		margin-bottom: clamp(0.75rem, 2vw, 1rem);
+		line-height: 1.8;
+		text-align: justify;
+	}
+
+	.file-body :global(p:empty) {
+		margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
+	}
+
+	.file-body :global(ul),
+	.file-body :global(ol) {
+		margin-left: clamp(0.5rem, 2vw, 1rem);
+		margin-bottom: clamp(0.75rem, 2vw, 1rem);
+		padding-left: clamp(1.5rem, 3vw, 2rem);
+		list-style: none;
+	}
+
+	.file-body :global(ul li) {
+		margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
+		line-height: 1.7;
+		position: relative;
+		padding-left: clamp(1rem, 2vw, 1.25rem);
+	}
+
+	.file-body :global(ul li::before) {
+		content: '•';
+		color: var(--accent);
+		font-weight: bold;
+		font-size: 1.2em;
+		position: absolute;
+		left: 0;
+		line-height: 1.4;
+	}
+
+	.file-body :global(ol) {
+		counter-reset: list-counter;
+	}
+
+	.file-body :global(ol li) {
+		margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
+		line-height: 1.7;
+		position: relative;
+		padding-left: clamp(1.5rem, 3vw, 2rem);
+		counter-increment: list-counter;
+	}
+
+	.file-body :global(ol li::before) {
+		content: counter(list-counter) '.';
+		color: var(--accent);
+		font-weight: 600;
+		position: absolute;
+		left: 0;
+		line-height: 1.7;
+	}
+
+	.file-body :global(code) {
+		background-color: rgba(125, 211, 160, 0.1);
+		color: var(--accent);
+		padding: 0.2em 0.4em;
+		border-radius: 3px;
+		font-size: 0.9em;
+		font-family: 'Pixel Operator Mono', 'Courier New', monospace;
+	}
+
+	.file-body :global(pre) {
+		background-color: rgba(0, 0, 0, 0.3);
+		border: 1px solid var(--border-color);
+		border-radius: 4px;
+		padding: clamp(0.75rem, 2vw, 1rem);
+		margin: clamp(0.75rem, 2vw, 1rem) 0;
+		overflow-x: auto;
+		font-family: 'Pixel Operator Mono', 'Courier New', monospace;
+		font-size: 0.9em;
+		line-height: 1.6;
+	}
+
+	.file-body :global(pre code) {
+		background: none;
+		padding: 0;
+		color: var(--text-primary);
+		display: block;
+	}
+
+	.file-body :global(blockquote) {
+		border-left: 3px solid var(--accent);
+		padding-left: clamp(1rem, 2vw, 1.5rem);
+		margin: clamp(0.75rem, 2vw, 1rem) 0;
+		color: var(--text-secondary);
+		font-style: italic;
+	}
+
+	.file-body :global(img) {
+		max-width: 100%;
+		height: auto;
+		border: 1px solid var(--border-color);
+		border-radius: 4px;
+		margin: clamp(1rem, 3vw, 1.5rem) 0;
+		display: block;
+	}
+
+	.file-body :global(table) {
+		width: 100%;
+		border-collapse: collapse;
+		margin: clamp(1rem, 3vw, 1.5rem) 0;
+		border: 1px solid var(--border-color);
+	}
+
+	.file-body :global(th),
+	.file-body :global(td) {
+		border: 1px solid var(--border-color);
+		padding: clamp(0.5rem, 1.5vw, 0.75rem);
+		text-align: left;
+	}
+
+	.file-body :global(th) {
+		background-color: rgba(125, 211, 160, 0.1);
+		color: var(--accent);
+		font-weight: 600;
+	}
+
+	.file-body :global(hr) {
+		border: none;
+		border-top: 1px solid var(--border-color);
+		margin: clamp(1.5rem, 4vw, 2rem) 0;
+	}
+
+	.file-body :global(strong) {
+		color: var(--accent);
+		font-weight: 600;
+	}
+
+	.file-body :global(em) {
+		color: var(--text-secondary);
+		font-style: italic;
+	}
+
+	/* Mejorar visualización de tecnologías y texto en línea */
+	.file-body :global(p strong) {
+		display: inline;
+		margin: 0 0.1em;
+	}
+
+	.file-body :global(a) {
+		color: var(--accent);
+		text-decoration: none;
+		border-bottom: 1px solid var(--accent);
+		transition: opacity 0.2s ease;
+	}
+
+	.file-body :global(a:hover) {
+		opacity: 0.8;
+	}
+
+	.interactive-line {
+		margin-top: clamp(1rem, 3vw, 1.5rem);
+	}
+
+	.back-link {
+		text-decoration: none;
+		display: inline-flex;
+		align-items: center;
+		transition: opacity 0.2s ease;
+	}
+
+	.back-link:hover {
+		opacity: 0.8;
+	}
+
+	.back-link .command {
+		color: var(--command-color);
 	}
 
 	@media (max-width: 768px) {
+		body {
+			padding: 1rem;
+		}
+
 		main {
-			padding: clamp(1.5rem, 4vw, 2rem) clamp(1rem, 3vw, 1.5rem);
+			width: calc(100% - 2rem);
+			height: calc(100vh - 2rem);
+			max-width: calc(100% - 2rem);
+			max-height: calc(100vh - 2rem);
 		}
 
-		.project-header {
-			margin-bottom: clamp(2rem, 4vw, 2.5rem);
-			padding-bottom: clamp(1.5rem, 3vw, 2rem);
+		.terminal {
+			width: 100%;
+			height: calc(100% - 4rem);
+			max-width: 100%;
+			max-height: calc(100% - 4rem);
 		}
 
-		.project-section {
-			margin-bottom: clamp(1.5rem, 3vw, 2rem);
+		.header-main {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+
+		.header-content {
+			flex-direction: row;
+			width: 100%;
+		}
+
+		.project-links {
+			width: 100%;
+			justify-content: flex-start;
 		}
 	}
 </style>
-
