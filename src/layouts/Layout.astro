@@ -1,11 +1,12 @@
 ---
+import Analytics from '@vercel/analytics/astro';
 import '../styles/global.css';
 
-interface Props {
+type Props = {
 	showFooter?: boolean;
-}
+};
 
-const { showFooter = true } = Astro.props;
+const { showFooter = true } = Astro.props as Props;
 ---
 
 <!doctype html>
@@ -24,6 +25,7 @@ const { showFooter = true } = Astro.props;
 	</head>
 	<body>
 		<slot />
+		<Analytics />
 		{showFooter && (
 			<footer class="global-footer" id="github-footer">
 				<div class="footer-command">:q — exit</div>
