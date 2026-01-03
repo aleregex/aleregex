@@ -59,28 +59,6 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
       ".terminal-body"
     ) as HTMLElement;
 
-    if (isMobile) {
-      const cursor2 = document.getElementById("cursor-2");
-      const commandInput = document.getElementById(
-        "command-input"
-      ) as HTMLInputElement;
-      const interactiveLine = document.getElementById("interactive-line");
-
-      if (cursor2) cursor2.style.display = "none";
-      if (commandInput) {
-        commandInput.disabled = true;
-        commandInput.readOnly = true;
-        commandInput.style.display = "none";
-        commandInput.style.pointerEvents = "none";
-        commandInput.setAttribute("tabindex", "-1");
-        commandInput.setAttribute("readonly", "true");
-        commandInput.setAttribute("aria-hidden", "true");
-      }
-      if (interactiveLine) {
-        interactiveLine.style.display = "none";
-      }
-    }
-
     const lsCommand = "ls";
 
     const outputs = {
@@ -135,29 +113,24 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
     };
 
     const showLine = (id: string) => {
-      // Never show interactive-line on mobile
-      if (isMobile && id === "interactive-line") {
-        return;
-      }
       const line = document.getElementById(id);
-      if (line) {
-        // If interactive-line on mobile, keep it hidden
-        if (isMobile && line.id === "interactive-line") {
-          line.style.display = "none";
-          return;
-        }
-        // Show line and enable input on desktop
-        line.classList.remove("hidden");
-        if (id === "interactive-line") {
-          line.style.display = "";
-          const input = line.querySelector('#command-input');
-          if (input instanceof HTMLInputElement) {
-            input.disabled = false;
-            input.readOnly = false;
-            input.removeAttribute('readonly');
-            input.removeAttribute('disabled');
-            input.setAttribute('tabindex', '0');
-            input.removeAttribute('aria-hidden');
+      if (!line) return;
+
+      line.classList.remove("hidden");
+      if (id === "interactive-line") {
+        line.style.display = "";
+        const input = line.querySelector("#command-input");
+        if (input instanceof HTMLInputElement) {
+          input.disabled = false;
+          input.readOnly = false;
+          input.removeAttribute("readonly");
+          input.removeAttribute("disabled");
+          input.setAttribute("tabindex", "0");
+          input.removeAttribute("aria-hidden");
+          input.setAttribute("inputmode", "text");
+          input.setAttribute("enterkeyhint", "go");
+          input.setAttribute("autocapitalize", "off");
+          if (!isMobile) {
             input.focus();
           }
         }
@@ -232,16 +205,8 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
                           projectsContainer.appendChild(line);
                         });
 
-                        // Show input only when not on mobile
-                        if (!isMobile) {
-                          showLine("interactive-line");
-                          const input = document.getElementById(
-                            "command-input"
-                          ) as HTMLInputElement;
-                          if (input) {
-                            input.focus();
-                          }
-                        }
+                        // Mostrar input también en móvil (enfoca solo desktop)
+                        showLine("interactive-line");
 
                         // Ensure scroll is at the end
                         if (terminalBody) {
@@ -321,17 +286,10 @@ import TerminalLayout from "../layouts/TerminalLayout.astro";
         });
       }
 
-      if (!isMobile) {
-        showLine("interactive-line");
-      }
+      showLine("interactive-line");
     }
 
-    // On mobile, everything is already hidden at start, just exit
-    if (isMobile) {
-      return; // Return early on mobile to avoid initializing the interactive terminal
-    }
-
-    // Interactive terminal - desktop only
+    // Interactive terminal
 
     const commandInput = document.getElementById(
       "command-input"
@@ -800,8 +758,8 @@ Type a command and press Enter to execute it.`;
       commandInput.focus();
     });
 
-    // Initial focus after the animation
-    if (!shouldAnimate) {
+    // Initial focus after the animation (solo desktop para evitar teclado inmediato)
+    if (!shouldAnimate && !isMobile) {
       setTimeout(() => {
         commandInput.focus();
       }, 100);

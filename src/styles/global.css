@@ -388,7 +388,7 @@ main {
 	outline: none;
 	color: var(--command-color);
 	font-family: 'Pixel Operator Mono', 'Courier New', monospace;
-	font-size: inherit;
+	font-size: clamp(1rem, 2.8vw, 1.05rem);
 	flex: 1;
 	min-width: 0;
 	max-width: 100%;
@@ -396,7 +396,7 @@ main {
 	padding: 0;
 	margin: 0;
 	caret-color: var(--accent);
-	line-height: inherit;
+	line-height: 1.5;
 	height: auto;
 	vertical-align: baseline;
 }
@@ -531,15 +531,6 @@ main {
 	position: relative;
 }
 
-@media (max-width: 768px) {
-	.interactive-line {
-		display: none !important;
-	}
-
-	.command-input {
-		display: none !important;
-	}
-}
 
 /* Command output lines */
 .command-output-line {
