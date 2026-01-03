@@ -22,10 +22,11 @@ const { showFooter = true } = Astro.props as Props;
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Pixel+Operator+Mono:wght@400&display=swap" rel="stylesheet">
+		
+		<Analytics />
 	</head>
 	<body>
 		<slot />
-		<Analytics />
 		{showFooter && (
 			<footer class="global-footer" id="github-footer">
 				<div class="footer-command">:q — exit</div>
