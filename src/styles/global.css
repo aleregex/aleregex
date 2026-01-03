@@ -17,6 +17,23 @@
 	--error-color: #ff6b6b;
 }
 
+/* Fuente local Pixel Operator Mono (colocar el .ttf en /public/fonts/) */
+@font-face {
+	font-family: 'Pixel Operator Mono';
+	src: url('/fonts/PixelOperatorMono.ttf') format('truetype');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Pixel Operator Mono';
+	src: url('/fonts/PixelOperatorMono.ttf') format('truetype');
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
 /* Estilos globales de HTML y Body */
 html {
 	overflow: hidden;
